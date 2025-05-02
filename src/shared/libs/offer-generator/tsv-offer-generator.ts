@@ -10,7 +10,7 @@ import {
 } from '../../helpers/index.js';
 
 export class TSVOfferGenerator implements OfferGenerator {
-  constructor(private readonly mockData: MockServerData) {}
+  constructor(private readonly mockData: MockServerData) { }
 
   public generate(): string {
     const title = getRandomItem<string>(this.mockData.titles);

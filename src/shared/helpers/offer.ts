@@ -1,4 +1,4 @@
-import { CityName, Convenience, Offer, OfferType, UserType} from '../types/index.js';
+import { CityName, Convenience, Offer, OfferType, UserType } from '../types/index.js';
 
 export function createOffer(offerData: string): Offer {
   const [
@@ -33,9 +33,9 @@ export function createOffer(offerData: string): Offer {
     description,
     publicationDate: new Date(publicationDate),
     city: {
-        name: cityName as CityName,
-        latitude: parseFloat(cityLatitude),
-        longitude: parseFloat(cityLongitude),
+      name: cityName as CityName,
+      latitude: parseFloat(cityLatitude),
+      longitude: parseFloat(cityLongitude),
     },
     imagePreview,
     images: images.split(';'),
@@ -48,16 +48,16 @@ export function createOffer(offerData: string): Offer {
     price: parseFloat(price),
     conveniences: conveniences.split(';') as Convenience[],
     author: {
-        name,
-        email,
-        avatarPath,
-        password,
-        type: userType as UserType,
+      name,
+      email,
+      avatarPath,
+      password,
+      type: userType as UserType,
     },
     commentsCount: parseFloat(commentsCount),
     coordinates: {
-        latitude: parseFloat(latitude),
-        longitude: parseFloat(longitude),
+      latitude: parseFloat(latitude),
+      longitude: parseFloat(longitude),
     }
   };
 }
