@@ -7,7 +7,7 @@ export class HelpCommand implements Command {
   }
 
   public async execute(..._parameters: string[]): Promise<void> {
-    
+
     console.info(chalk.cyan(`
         Программа для подготовки данных для REST API сервера.
         Пример:
