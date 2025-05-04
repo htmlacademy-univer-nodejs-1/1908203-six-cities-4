@@ -16,7 +16,7 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   @prop({ trim: true, required: true })
   public title!: string;
 
-  @prop({trim: true})
+  @prop({trim: true, required: true })
   public description!: string;
 
   @prop({ required: true })
@@ -24,6 +24,7 @@ export class OfferEntity extends defaultClasses.TimeStamps {
 
   @prop({
     type: () => String,
+    required: true,
     enum: CityName
   })
   public cityName!: CityName;
@@ -41,22 +42,23 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   @prop({ required: true })
   public isPremium!: boolean;
 
-  @prop()
+  @prop({ required: true })
   public rating!: number;
 
   @prop({
     type: () => String,
+    required: true,
     enum: OfferType
   })
   public type!: OfferType;
 
-  @prop()
+  @prop({ required: true })
   public rooms!: number;
 
-  @prop()
+  @prop({ required: true })
   public guests!: number;
 
-  @prop()
+  @prop({ required: true })
   public price!: number;
 
   @prop({
