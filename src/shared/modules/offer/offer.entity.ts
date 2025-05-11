@@ -4,11 +4,13 @@ import { UserEntity } from '../user/index.js';
 import { CoordinatesEntity } from '../coordinates/coordinates.entity.js';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
-export interface OfferEntity extends defaultClasses.Base {}
+export interface OfferEntity extends defaultClasses.Base { }
 
 @modelOptions({
   schemaOptions: {
-    collection: 'offers'
+    collection: 'offers',
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 })
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
@@ -16,7 +18,7 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   @prop({ trim: true, required: true })
   public title!: string;
 
-  @prop({trim: true, required: true })
+  @prop({ trim: true, required: true })
   public description!: string;
 
   @prop({ required: true })
@@ -42,9 +44,6 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   @prop({ required: true })
   public isPremium!: boolean;
 
-  @prop({ required: true })
-  public rating!: number;
-
   @prop({
     type: () => String,
     required: true,
@@ -60,6 +59,16 @@ export class OfferEntity extends defaultClasses.TimeStamps {
 
   @prop({ required: true })
   public price!: number;
+
+  @prop({ required: true, default: 0 })
+  public commentsCount!: number;
+
+  @prop({
+    required: true,
+    default: 0,
+    select: false
+  })
+  public totalRating: number;
 
   @prop({
     type: [String],
@@ -78,6 +87,10 @@ export class OfferEntity extends defaultClasses.TimeStamps {
     required: true
   })
   public coordinates!: CoordinatesEntity;
+
+  public get rating(): number {
+    return this.totalRating / this.commentsCount;
+  }
 }
 
 export const OfferModel = getModelForClass(OfferEntity);
