@@ -277,7 +277,7 @@ paths:
     delete:
       summary: Удаление предложения из избранного
       tags:
-        - comments
+        - offers
       security:
         - bearerAuth: []
       parameters:
