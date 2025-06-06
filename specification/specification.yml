@@ -99,7 +99,7 @@ paths:
         '403':
           description: Недостаточно прав
 
-  /offers/{offerId}/comments:
+  /comments/{offerId}/:
     parameters:
     - name: offerId
       required: true
@@ -159,7 +159,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
 
-  /auth/login:
+  /users/login:
     post:
       summary: Вход в систему
       tags:
@@ -187,7 +187,7 @@ paths:
         '401':
           description: Неверные данные
 
-  /auth/logout:
+  /users/logout:
     post:
       summary: Выход из системы
       tags:
@@ -198,7 +198,7 @@ paths:
         '204':
           description: Сессия завершена
 
-  /auth/status:
+  /users/status:
     get:
       summary: Проверка состояния пользователя
       tags:
@@ -315,7 +315,7 @@ components:
           properties:
             id:
               type: string
-            author:
+            user:
               type: string
             date:
               type: string
@@ -331,7 +331,7 @@ components:
         - latitude
         - longitude
 
-    CityName:
+    City:
       type: string
       enum:
         - Paris
@@ -340,20 +340,6 @@ components:
         - Amsterdam
         - Hamburg
         - Dusseldorf
-
-    City:
-      type: object
-      properties:
-        name:
-          $ref: '#/components/schemas/CityName'
-        latitude:
-          type: number
-        longitude:
-          type: number
-      required:
-        - name
-        - latitude
-        - longitude
 
     Convenience:
       type: string
@@ -414,7 +400,7 @@ components:
           format: date-time
         city:
           $ref: '#/components/schemas/City'
-        imagePreview:
+        image:
           type: string
         isPremium:
           type: boolean
@@ -429,7 +415,7 @@ components:
         - isFavorite
         - publicationDate
         - city
-        - imagePreview
+        - image
         - isPremium
         - rating
         - commentsCount
@@ -453,7 +439,7 @@ components:
               type: integer
             guests:
               type: integer
-            author:
+            user:
               $ref: '#/components/schemas/User'
             coordinates:
               $ref: '#/components/schemas/Coordinates'
@@ -463,5 +449,5 @@ components:
             - conveniences
             - rooms
             - guests
-            - author
+            - user
             - coordinates

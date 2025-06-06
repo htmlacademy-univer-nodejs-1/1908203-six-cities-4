@@ -1,5 +1,5 @@
 import { defaultClasses, getModelForClass, modelOptions, prop, Ref } from '@typegoose/typegoose';
-import { CityName, OfferType } from '../../types/index.js';
+import { City, OfferType } from '../../types/index.js';
 import { UserEntity } from '../user/index.js';
 import { CoordinatesEntity } from '../coordinates/coordinates.entity.js';
 
@@ -22,17 +22,17 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   public description!: string;
 
   @prop({ required: true })
-  public publicationDate!: Date;
+  public postDate!: Date;
 
   @prop({
     type: () => String,
     required: true,
-    enum: CityName
+    enum: City
   })
-  public cityName!: CityName;
+  public city!: City;
 
   @prop({ required: true })
-  public imagePreview!: string;
+  public image!: string;
 
   // TODO
   @prop({
@@ -66,7 +66,6 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   @prop({
     required: true,
     default: 0,
-    select: false
   })
   public totalRating: number;
 
@@ -80,7 +79,7 @@ export class OfferEntity extends defaultClasses.TimeStamps {
     ref: UserEntity,
     required: true
   })
-  public authorId!: Ref<UserEntity>;
+  public userId!: Ref<UserEntity>;
 
   @prop({
     _id: false,
@@ -89,6 +88,10 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   public coordinates!: CoordinatesEntity;
 
   public get rating(): number {
+    if (this.commentsCount === 0) {
+      return 0;
+    }
+
     return this.totalRating / this.commentsCount;
   }
 }

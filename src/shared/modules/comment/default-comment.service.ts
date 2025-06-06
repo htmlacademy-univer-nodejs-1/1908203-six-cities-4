@@ -16,7 +16,7 @@ export class DefaultCommentService implements CommentService {
   ) { }
 
   public async create(dto: CreateCommentDto): Promise<types.DocumentType<CommentEntity>> {
-    const result = await this.commentModel.create(dto);
+    const result = (await this.commentModel.create(dto)).populate('userId');
     this.logger.info(`New comment created: ${dto.text}`);
 
     await this.offerModel.findByIdAndUpdate(dto.offerId, {
@@ -29,6 +29,7 @@ export class DefaultCommentService implements CommentService {
   public async getCommentsByOfferId(offerId: string): Promise<types.DocumentType<CommentEntity>[]> {
     return this.commentModel
       .find({ offerId })
-      .limit(50);
+      .limit(50)
+      .populate('userId');
   }
 }

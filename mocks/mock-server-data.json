@@ -20,7 +20,7 @@
         "Unwind in this charming countryside villa surrounded by nature and wine country.",
         "Compact yet stylish studio designed for comfort and convenience during short trips."
       ],
-      "cityNames": [
+      "cities": [
         "Paris",
         "Cologne",
         "Brussels",
@@ -107,4 +107,3 @@
       ]
     }
 }
-  

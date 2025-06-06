@@ -1,11 +1,13 @@
 import { inject, injectable } from 'inversify';
 import { OfferService } from './offer-service.interface.js';
-import { CityName, Component } from '../../types/index.js';
+import { City, Component } from '../../types/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { DocumentType, types } from '@typegoose/typegoose';
 import { OfferEntity } from './offer.entity.js';
 import { CreateOfferDto } from './dto/create-offer.dto.js';
 import { FavoriteEntity } from '../favorite/favorite.entity.js';
+import { UpdateOfferDto } from './dto/update-offer.dto.js';
+import { CommentEntity } from '../comment/comment.entity.js';
 
 @injectable()
 export class DefaultOfferService implements OfferService {
@@ -13,7 +15,12 @@ export class DefaultOfferService implements OfferService {
     @inject(Component.Logger) private readonly logger: Logger,
     @inject(Component.OfferModel) private readonly offerModel: types.ModelType<OfferEntity>,
     @inject(Component.FavoriteModel) private readonly favoriteModel: types.ModelType<FavoriteEntity>,
+    @inject(Component.CommentModel) private readonly commentModel: types.ModelType<CommentEntity>,
   ) { }
+
+  public async exists(documentId: string): Promise<boolean> {
+    return (await this.offerModel.exists({_id: documentId})) !== null;
+  }
 
   public async create(dto: CreateOfferDto): Promise<DocumentType<OfferEntity>> {
     const result = await this.offerModel.create(dto);
@@ -23,10 +30,12 @@ export class DefaultOfferService implements OfferService {
   }
 
   public async findById(offerId: string): Promise<DocumentType<OfferEntity> | null> {
-    return this.offerModel.findById(offerId);
+    return this.offerModel
+      .findById(offerId)
+      .populate('userId');
   }
 
-  public async editById(offerId: string, dto: CreateOfferDto): Promise<DocumentType<OfferEntity> | null> {
+  public async editById(offerId: string, dto: UpdateOfferDto): Promise<DocumentType<OfferEntity> | null> {
     const result = this.offerModel.findByIdAndUpdate(offerId, { $set: dto, }, { new: true });
 
     this.logger.info(`Offer ${offerId} was edited`);
@@ -36,6 +45,7 @@ export class DefaultOfferService implements OfferService {
 
   public async deleteById(offerId: string): Promise<null> {
     await this.offerModel.findByIdAndDelete(offerId);
+    await this.commentModel.deleteMany({offerId: offerId});
 
     this.logger.info(`Offer deleted: ${offerId}`);
 
@@ -46,22 +56,18 @@ export class DefaultOfferService implements OfferService {
     return this.offerModel
       .find()
       .limit(60)
-      .sort({ postDate: -1 })
-      .populate('authorId');
+      .sort({ postDate: -1 });
   }
 
-  public async getPremiumOffersByCity(cityName: CityName): Promise<DocumentType<OfferEntity>[]> {
+  public async getPremiumOffersByCity(city: City): Promise<DocumentType<OfferEntity>[]> {
     return this.offerModel
-      .find({ cityName, isPremium: true })
+      .find({ city, isPremium: true })
       .limit(3)
-      .sort({ postDate: -1 })
-      .populate('authorId');
+      .sort({ postDate: -1 });
   }
 
   public async getFavorites(userId: string): Promise<DocumentType<OfferEntity>[]> {
-    return this.favoriteModel
-      .find({ userId, })
-      .populate('offerId');
+    return this.favoriteModel.find({ userId, });
   }
 
   public async addToFavorite(offerId: string, userId: string): Promise<null> {
