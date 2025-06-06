@@ -9,6 +9,7 @@ import { DefaultUserService, UserModel } from '../../shared/modules/user/index.j
 import { DEFAULT_DB_PORT, DEFAULT_USER_PASSWORD } from './command.constant.js';
 import { Offer } from '../../shared/types/index.js';
 import { FavoriteModel } from '../../shared/modules/favorite/index.js';
+import { CommentModel } from '../../shared/modules/comment/comment.entity.js';
 
 export class ImportCommand implements Command {
   private userService: UserService;
@@ -22,7 +23,7 @@ export class ImportCommand implements Command {
     this.onCompleteImport = this.onCompleteImport.bind(this);
 
     this.logger = new PinoLogger();
-    this.offerService = new DefaultOfferService(this.logger, OfferModel, FavoriteModel);
+    this.offerService = new DefaultOfferService(this.logger, OfferModel, FavoriteModel, CommentModel);
     this.userService = new DefaultUserService(this.logger, UserModel);
     this.databaseClient = new MongoDatabaseClient(this.logger);
   }
@@ -40,25 +41,22 @@ export class ImportCommand implements Command {
 
   private async saveOffer(offer: Offer) {
     const user = await this.userService.findOrCreate({
-      ...offer.author,
+      ...offer.user,
       password: DEFAULT_USER_PASSWORD
     }, this.salt);
 
     await this.offerService.create({
-      authorId: user.id,
+      userId: user.id,
       title: offer.title,
       description: offer.description,
-      imagePreview: offer.imagePreview,
-      publicationDate: offer.publicationDate,
+      image: offer.image,
+      postDate: offer.postDate,
       price: offer.price,
       type: offer.type,
-      rating: offer.rating,
-      cityName: offer.city.name,
-      isFavorite: offer.isFavorite,
+      city: offer.city,
       isPremium: offer.isPremium,
       guests: offer.guests,
       rooms: offer.rooms,
-      commentsCount: 100,
       images: offer.images,
       conveniences: offer.conveniences,
       coordinates: offer.coordinates,

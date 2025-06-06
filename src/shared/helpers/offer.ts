@@ -1,14 +1,12 @@
-import { CityName, Convenience, Offer, OfferType, UserType } from '../types/index.js';
+import { City, Convenience, Offer, OfferType, UserType } from '../types/index.js';
 
 export function createOffer(offerData: string): Offer {
   const [
     title,
     description,
     publicationDate,
-    cityName,
-    cityLatitude,
-    cityLongitude,
-    imagePreview,
+    city,
+    image,
     images,
     isPremium,
     isFavorite,
@@ -30,13 +28,9 @@ export function createOffer(offerData: string): Offer {
   return {
     title,
     description,
-    publicationDate: new Date(publicationDate),
-    city: {
-      name: cityName as CityName,
-      latitude: parseFloat(cityLatitude),
-      longitude: parseFloat(cityLongitude),
-    },
-    imagePreview,
+    postDate: new Date(publicationDate),
+    city: city as City,
+    image: image,
     images: images.split(';'),
     isPremium: isPremium === 'true',
     isFavorite: isFavorite === 'true',
@@ -46,7 +40,7 @@ export function createOffer(offerData: string): Offer {
     guests: parseFloat(guests),
     price: parseFloat(price),
     conveniences: conveniences.split(';') as Convenience[],
-    author: {
+    user: {
       name,
       email,
       avatarPath,

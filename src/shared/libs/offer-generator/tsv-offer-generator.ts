@@ -18,10 +18,8 @@ export class TSVOfferGenerator implements OfferGenerator {
     const publicationDate = dayjs()
       .subtract(generateRandomValue(1, 7), 'day')
       .toISOString();
-    const cityName = getRandomItem(this.mockData.cityNames);
-    const cityLatitude = generateRandomCoordinate();
-    const cityLongitude = generateRandomCoordinate();
-    const imagePreview = getRandomItem(this.mockData.images);
+    const city = getRandomItem(this.mockData.cities);
+    const image = getRandomItem(this.mockData.images);
     const images = getRandomItems(this.mockData.images).join(';');
     const isPremium = getRandomBoolean();
     const isFavorite = getRandomBoolean();
@@ -44,10 +42,8 @@ export class TSVOfferGenerator implements OfferGenerator {
       title,
       description,
       publicationDate,
-      cityName,
-      cityLatitude,
-      cityLongitude,
-      imagePreview,
+      city,
+      image,
       images,
       isPremium,
       isFavorite,

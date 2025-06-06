@@ -1,4 +1,4 @@
-import { CityName } from './city-name.enum.js';
+import { City } from './city-name.enum.js';
 import { Convenience } from './convenience.type.js';
 import { OfferType } from './offer-type.enum.js';
 
@@ -7,7 +7,7 @@ export type MockServerData = {
   descriptions: string[];
   images: string[];
   types: OfferType[];
-  cityNames: CityName[];
+  cities: City[];
   conveniences: Convenience[];
   avatarPaths: string[];
   passwords: string[];
