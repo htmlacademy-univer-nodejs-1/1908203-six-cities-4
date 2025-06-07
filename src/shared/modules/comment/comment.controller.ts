@@ -11,7 +11,6 @@ import { CommentRdo } from './rdo/comment.rdo.js';
 import { CreateCommentRequest } from './types/create-comment-request.type.js';
 import { CreateCommentDto } from './dto/create-comment.dto.js';
 import { ParamOfferId } from '../offer/type/param-offer-id.type.js';
-
 @injectable()
 export default class CommentController extends BaseController {
   constructor(
@@ -31,7 +30,6 @@ export default class CommentController extends BaseController {
         new ValidateDtoMiddleware(CreateCommentDto)
       ]
     });
-
     this.addRoute({
       path: '/:offerId/',
       method: HttpMethod.Get,

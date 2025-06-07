@@ -90,7 +90,7 @@ export class OfferEntity extends defaultClasses.TimeStamps {
       return 0;
     }
 
-    return this.totalRating / this.commentsCount;
+    return Number((this.totalRating / this.commentsCount).toFixed(1));
   }
 }
 
