@@ -6,17 +6,18 @@ import { DefaultOfferService, OfferModel, OfferService } from '../../shared/modu
 import { DatabaseClient, MongoDatabaseClient } from '../../shared/libs/database-client/index.js';
 import { Logger, PinoLogger } from '../../shared/libs/logger/index.js';
 import { DefaultUserService, UserModel } from '../../shared/modules/user/index.js';
-import { DEFAULT_DB_PORT, DEFAULT_USER_PASSWORD } from './command.constant.js';
 import { Offer } from '../../shared/types/index.js';
 import { FavoriteModel } from '../../shared/modules/favorite/index.js';
 import { CommentModel } from '../../shared/modules/comment/comment.entity.js';
+import { RestConfig } from '../../shared/libs/config/index.js';
+import { DEFAULT_USER_PASSWORD } from './command.constant.js';
 
 export class ImportCommand implements Command {
   private userService: UserService;
   private offerService: OfferService;
   private databaseClient: DatabaseClient;
   private logger: Logger;
-  private salt: string;
+  private config: RestConfig;
 
   constructor() {
     this.onImportedLine = this.onImportedLine.bind(this);
@@ -26,6 +27,7 @@ export class ImportCommand implements Command {
     this.offerService = new DefaultOfferService(this.logger, OfferModel, FavoriteModel, CommentModel);
     this.userService = new DefaultUserService(this.logger, UserModel);
     this.databaseClient = new MongoDatabaseClient(this.logger);
+    this.config = new RestConfig(this.logger);
   }
 
   private async onImportedLine(line: string, resolve: () => void) {
@@ -43,7 +45,7 @@ export class ImportCommand implements Command {
     const user = await this.userService.findOrCreate({
       ...offer.user,
       password: DEFAULT_USER_PASSWORD
-    }, this.salt);
+    }, this.config.get('SALT'));
 
     await this.offerService.create({
       userId: user.id,
@@ -67,9 +69,14 @@ export class ImportCommand implements Command {
     return '--import';
   }
 
-  public async execute(filename: string, login: string, password: string, host: string, dbname: string, salt: string): Promise<void> {
-    const uri = getMongoURI(login, password, host, DEFAULT_DB_PORT, dbname);
-    this.salt = salt;
+  public async execute(filename: string): Promise<void> {
+    const uri = getMongoURI(
+      this.config.get('DB_USER'),
+      this.config.get('DB_PASSWORD'),
+      this.config.get('DB_HOST'),
+      this.config.get('DB_PORT'),
+      this.config.get('DB_NAME'),
+    );
 
     await this.databaseClient.connect(uri);
 

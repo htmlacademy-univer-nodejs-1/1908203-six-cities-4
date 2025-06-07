@@ -1,7 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { BaseController, HttpError, HttpMethod, UploadFileMiddleware, ValidateObjectIdMiddleware } from '../../libs/rest/index.js';
+import { BaseController, DocumentExistsMiddleware, HttpError, HttpMethod, UploadFileMiddleware, ValidateObjectIdMiddleware } from '../../libs/rest/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { Component } from '../../types/index.js';
 import { CreateUserRequest } from './type/create-user-request.type.js';
@@ -33,6 +33,7 @@ export class UserController extends BaseController {
       handler: this.uploadAvatar,
       middlewares: [
         new ValidateObjectIdMiddleware('userId'),
+        new DocumentExistsMiddleware(this.userService, 'User', 'userId'),
         new UploadFileMiddleware(this.configService.get('UPLOAD_DIRECTORY'), 'avatar')
       ]
     });
@@ -100,13 +101,15 @@ export class UserController extends BaseController {
   }
 
   public async uploadAvatar(
-    _req: Request<ParamUserId>,
-    _res: Response
+    req: Request<ParamUserId>,
+    res: Response
   ): Promise<void> {
-    throw new HttpError(
-      StatusCodes.NOT_IMPLEMENTED,
-      'Not implemented',
-      'UserController',
-    );
+    const { userId } = req.params;
+    if (!req.file) {
+      res.status(StatusCodes.BAD_REQUEST).json({ error: 'No file uploaded' });
+      return;
+    }
+    const updatedUser = await this.userService.updateAvatar(userId, `/static/${req.file.filename}`);
+    res.status(StatusCodes.CREATED).json({ avatarUrl: updatedUser?.avatarPath || '/static/default-avatar-picture.png' });
   }
 }
