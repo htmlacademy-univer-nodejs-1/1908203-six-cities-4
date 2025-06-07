@@ -1,7 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { BaseController, HttpError, HttpMethod, UploadFileMiddleware, ValidateObjectIdMiddleware } from '../../libs/rest/index.js';
+import { BaseController, HttpError, HttpMethod, PrivateRouteMiddleware, UploadFileMiddleware, ValidateDtoMiddleware } from '../../libs/rest/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { Component } from '../../types/index.js';
 import { CreateUserRequest } from './type/create-user-request.type.js';
@@ -10,7 +10,8 @@ import { Config, RestSchema } from '../../libs/config/index.js';
 import { fillDTO } from '../../helpers/index.js';
 import { UserRdo } from './rdo/user.rdo.js';
 import { LoginUserRequest } from './type/login-user-request.type.js';
-import { ParamUserId } from './type/param-user-id.js';
+import { AuthService } from '../auth/index.js';
+import { LoginUserDto, LoggedUserRdo } from './index.js';
 
 @injectable()
 export class UserController extends BaseController {
@@ -18,21 +19,32 @@ export class UserController extends BaseController {
     @inject(Component.Logger) protected readonly logger: Logger,
     @inject(Component.UserService) private readonly userService: UserService,
     @inject(Component.Config) private readonly configService: Config<RestSchema>,
+    @inject(Component.AuthService) private readonly authService: AuthService,
   ) {
     super(logger);
     this.logger.info('Register routes for UserController…');
 
-    this.addRoute({ path: '/', method: HttpMethod.Post, handler: this.create });
-    this.addRoute({ path: '/login', method: HttpMethod.Post, handler: this.login });
-    this.addRoute({ path: '/logout', method: HttpMethod.Post, handler: this.logout });
+    this.addRoute({
+      path: '/',
+      method: HttpMethod.Post,
+      handler: this.create
+    });
+
+    this.addRoute({
+      path: '/login',
+      method: HttpMethod.Post,
+      handler: this.login,
+      middlewares: [new ValidateDtoMiddleware(LoginUserDto)]
+    });
+
     this.addRoute({ path: '/status', method: HttpMethod.Get, handler: this.status });
 
     this.addRoute({
-      path: '/avatar/:userId',
+      path: '/avatar/',
       method: HttpMethod.Post,
       handler: this.uploadAvatar,
       middlewares: [
-        new ValidateObjectIdMiddleware('userId'),
+        new PrivateRouteMiddleware(),
         new UploadFileMiddleware(this.configService.get('UPLOAD_DIRECTORY'), 'avatar')
       ]
     });
@@ -56,57 +68,39 @@ export class UserController extends BaseController {
     this.created(res, fillDTO(UserRdo, result));
   }
 
-  public async login(
-    { body }: LoginUserRequest,
-    _res: Response,
-  ): Promise<void> {
-    const existsUser = await this.userService.findByEmail(body.email);
+  public async login({ body }: LoginUserRequest, res: Response): Promise<void> {
+    const user = await this.authService.verify(body);
+    const token = await this.authService.authenticate(user);
+    const responseData = fillDTO(LoggedUserRdo, {
+      email: user.email,
+      token,
+    });
+    this.ok(res, responseData);
+  }
 
-    if (! existsUser) {
+  public async status({ tokenPayload: { email }}: Request, res: Response): Promise<void> {
+    const foundedUser = await this.userService.findByEmail(email);
+
+    if (! foundedUser) {
       throw new HttpError(
         StatusCodes.UNAUTHORIZED,
-        `User with email ${body.email} not found.`,
-        'UserController',
+        'Unauthorized',
+        'UserController'
       );
     }
 
-    throw new HttpError(
-      StatusCodes.NOT_IMPLEMENTED,
-      'Not implemented',
-      'UserController',
-    );
+    this.ok(res, fillDTO(LoggedUserRdo, foundedUser));
   }
 
-  public async logout(
-    _req: Request,
-    _res: Response,
+  public async uploadAvatar({ file, tokenPayload }: Request, res: Response
   ): Promise<void> {
-    throw new HttpError(
-      StatusCodes.NOT_IMPLEMENTED,
-      'Not implemented',
-      'UserController',
-    );
-  }
+    if (!file) {
+      res.status(StatusCodes.BAD_REQUEST).json({ error: 'No file uploaded' });
+      return;
+    }
 
-  public async status(
-    _req: Request,
-    _res: Response,
-  ): Promise<void> {
-    throw new HttpError(
-      StatusCodes.NOT_IMPLEMENTED,
-      'Not implemented',
-      'UserController',
-    );
-  }
+    const updatedUser = await this.userService.updateAvatar(tokenPayload.id, `/static/${file.filename}`);
 
-  public async uploadAvatar(
-    _req: Request<ParamUserId>,
-    _res: Response
-  ): Promise<void> {
-    throw new HttpError(
-      StatusCodes.NOT_IMPLEMENTED,
-      'Not implemented',
-      'UserController',
-    );
+    res.status(StatusCodes.CREATED).json({ avatarUrl: updatedUser?.avatarPath || '/static/default-avatar-picture.png' });
   }
 }

@@ -1,9 +1,6 @@
-import { Expose, Type } from 'class-transformer';
+import { Expose } from 'class-transformer';
 import { OfferType } from '../../../types/offer-type.enum.js';
-import { City } from '../../../types/city-name.enum.js';
-import { Convenience } from '../../../types/convenience.type.js';
-import { UserRdo } from '../../user/rdo/user.rdo.js';
-import { CoordinatesRdo } from './coordinates.rdo.js';
+import { City } from '../../../types/city.enum.js';
 
 export class OfferRdo {
   @Expose()
@@ -15,7 +12,7 @@ export class OfferRdo {
   @Expose()
   public image: string;
 
-  @Expose()
+  @Expose({ name: 'createdAt' })
   public postDate: string;
 
   @Expose()
@@ -31,34 +28,11 @@ export class OfferRdo {
   public isPremium: boolean;
 
   @Expose()
+  public isFavorite: boolean;
+
+  @Expose()
   public city: City;
 
   @Expose()
   public rating: number;
-
-  @Expose({ groups: ['detailed'] })
-  public isFavorite: boolean;
-
-  @Expose({ groups: ['detailed'] })
-  public description!: string;
-
-  @Expose({ groups: ['detailed'] })
-  public images: string[];
-
-  @Expose({ groups: ['detailed'] })
-  public rooms: number;
-
-  @Expose({ groups: ['detailed'] })
-  public guests: number;
-
-  @Expose({ groups: ['detailed'] })
-  public conveniences: Convenience[];
-
-  @Expose({ name: 'userId', groups: ['detailed'] })
-  @Type(() => UserRdo)
-  public user: UserRdo;
-
-  @Expose({ groups: ['detailed'] })
-  @Type(() => CoordinatesRdo)
-  public coordinates: CoordinatesRdo;
 }

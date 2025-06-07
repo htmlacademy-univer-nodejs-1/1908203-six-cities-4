@@ -36,4 +36,8 @@ export class DefaultUserService implements UserService {
 
     return this.create(dto, salt);
   }
+
+  public async updateAvatar(userId: string, avatarPath: string): Promise<DocumentType<UserEntity> | null> {
+    return this.userModel.findByIdAndUpdate(userId, { $set: {avatarPath}, }, { new: true });
+  }
 }

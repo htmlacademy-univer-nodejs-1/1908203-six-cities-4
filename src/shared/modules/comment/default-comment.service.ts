@@ -1,11 +1,12 @@
 import { inject, injectable } from 'inversify';
 import { CommentService } from './comment-service.interface.js';
 import { CommentEntity } from './comment.entity.js';
-import { Component } from '../../types/index.js';
+import { Component, DESCENDING_ORDER } from '../../types/index.js';
 import { types } from '@typegoose/typegoose';
 import { CreateCommentDto } from './dto/create-comment.dto.js';
 import { Logger } from '../../libs/logger/index.js';
 import { OfferEntity } from '../offer/offer.entity.js';
+import { DEFAULT_COMMENTS_LIMIT } from './comment.constant.js';
 
 @injectable()
 export class DefaultCommentService implements CommentService {
@@ -29,7 +30,8 @@ export class DefaultCommentService implements CommentService {
   public async getCommentsByOfferId(offerId: string): Promise<types.DocumentType<CommentEntity>[]> {
     return this.commentModel
       .find({ offerId })
-      .limit(50)
+      .limit(DEFAULT_COMMENTS_LIMIT)
+      .sort({ createdAt: DESCENDING_ORDER })
       .populate('userId');
   }
 }
