@@ -13,6 +13,10 @@ export class DefaultUserService implements UserService {
     @inject(Component.UserModel) private readonly userModel: types.ModelType<UserEntity>
   ) { }
 
+  public async exists(documentId: string): Promise<boolean> {
+    return (await this.userModel.exists({_id: documentId})) !== null;
+  }
+
   public async create(dto: CreateUserDto, salt: string): Promise<DocumentType<UserEntity>> {
     const user = new UserEntity(dto);
     user.setPassword(dto.password, salt);
@@ -35,5 +39,13 @@ export class DefaultUserService implements UserService {
     }
 
     return this.create(dto, salt);
+  }
+
+  public async updateAvatar(userId: string, avatarPath: string): Promise<UserEntity | null> {
+    const user = await this.userModel.findByIdAndUpdate(userId, { $set: {avatarPath: avatarPath}, }, { new: true });
+
+    this.logger.info(`Avatar of user ${userId} was updated`);
+
+    return user;
   }
 }
