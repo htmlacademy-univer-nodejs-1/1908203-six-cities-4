@@ -1,5 +1,5 @@
-import { City } from './city-name.enum.js';
-import { Convenience } from './convenience.type.js';
+import { City } from './city.enum.js';
+import { Convenience } from './convenience.enum.js';
 import { OfferType } from './offer-type.enum.js';
 
 export type MockServerData = {

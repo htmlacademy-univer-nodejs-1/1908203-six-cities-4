@@ -47,9 +47,7 @@ export function createOffer(offerData: string): Offer {
       type: userType as UserType,
     },
     commentsCount: parseFloat(commentsCount),
-    coordinates: {
-      latitude: parseFloat(latitude),
-      longitude: parseFloat(longitude),
-    }
+    latitude: parseFloat(latitude),
+    longitude: parseFloat(longitude),
   };
 }

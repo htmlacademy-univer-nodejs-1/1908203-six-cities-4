@@ -1,4 +1,4 @@
-import { OfferEntity } from '../offer/index.js';
+import { OfferEntity } from './index.js';
 import { UserEntity } from '../user/index.js';
 import { defaultClasses, getModelForClass, modelOptions, prop, Ref } from '@typegoose/typegoose';
 

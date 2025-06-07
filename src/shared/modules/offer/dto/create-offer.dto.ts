@@ -1,13 +1,11 @@
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsDateString, IsEnum, IsInt, IsMongoId, IsUrl, Max, MaxLength, Min, MinLength } from 'class-validator';
-import { City, Convenience, Coordinates, OfferType } from '../../../types/index.js';
+import { ArrayMaxSize, ArrayMinSize, ArrayUnique, IsArray, IsBoolean, IsDateString, IsEnum, IsInt, IsOptional, IsUrl, Length, Max, Min } from 'class-validator';
+import { City, Convenience, OfferType } from '../../../types/index.js';
 
 export class CreateOfferDto {
-  @MinLength(10)
-  @MaxLength(100)
+  @Length(10, 100)
   public title: string;
 
-  @MinLength(20)
-  @MaxLength(1024)
+  @Length(20, 1024)
   public description: string;
 
   @IsDateString()
@@ -41,10 +39,19 @@ export class CreateOfferDto {
   public rooms: number;
 
   @IsEnum(Convenience, { each: true })
+  @ArrayMinSize(1)
+  @ArrayUnique()
   public conveniences: Convenience[];
 
+  @IsInt()
+  @Min(-180)
+  @Max(180)
+  public latitude: number;
 
-  public coordinates: Coordinates;
+  @IsInt()
+  @Min(-180)
+  @Max(180)
+  public longitude: number;
 
   @IsArray()
   @ArrayMinSize(6)
@@ -52,6 +59,6 @@ export class CreateOfferDto {
   @IsUrl({}, { each: true })
   public images: string[];
 
-  @IsMongoId()
-  public userId: string;
+  @IsOptional()
+  public userId?: string;
 }
