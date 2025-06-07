@@ -1,7 +1,6 @@
 import { inject, injectable } from 'inversify';
 import { Request, Response } from 'express';
-import { StatusCodes } from 'http-status-codes';
-import { BaseController, DocumentExistsMiddleware, HttpError, HttpMethod, PrivateRouteMiddleware, ValidateDtoMiddleware, ValidateObjectIdMiddleware } from '../../libs/rest/index.js';
+import { BaseController, DocumentExistsMiddleware, HttpMethod, PrivateRouteMiddleware, ValidateDtoMiddleware, ValidateObjectIdMiddleware } from '../../libs/rest/index.js';
 import { Component } from '../../types/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { CommentService } from './comment-service.interface.js';
@@ -23,7 +22,7 @@ export default class CommentController extends BaseController {
 
     this.logger.info('Register routes for CommentController…');
     this.addRoute({
-      path: '',
+      path: '/',
       method: HttpMethod.Post,
       handler: this.create,
       middlewares: [
@@ -43,20 +42,8 @@ export default class CommentController extends BaseController {
     });
   }
 
-  public async create(
-    { body }: CreateCommentRequest,
-    res: Response
-  ): Promise<void> {
-
-    if (!await this.offerService.exists(body.offerId)) {
-      throw new HttpError(
-        StatusCodes.NOT_FOUND,
-        `Offer with id ${body.offerId} not found.`,
-        'CommentController'
-      );
-    }
-
-    const comment = await this.commentService.create(body);
+  public async create({ body, tokenPayload }: CreateCommentRequest, res: Response): Promise<void> {
+    const comment = await this.commentService.create({...body, userId: tokenPayload.id});
     this.created(res, fillDTO(CommentRdo, comment));
   }
 
